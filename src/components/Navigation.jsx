@@ -1,14 +1,17 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import LanguageToggle from './LanguageToggle';
+import { useLanguage } from '../hooks/useLanguage';
+import { labels } from '../utils/translations';
 
 const Navigation = () => {
   const location = useLocation();
+  const { language, toggleLanguage } = useLanguage();
+  const t = labels[language];
   
   const navItems = [
-    { path: '/', label: '首页', icon: '🏠' },
-    { path: '/history', label: '历史记录', icon: '📋' },
-    { path: '/evaluation', label: '课程评价', icon: '⭐' },
+    { path: '/', label: t.navHome, icon: '🏠' },
+    { path: '/history', label: t.navHistory, icon: '📋' },
+    { path: '/evaluation', label: t.navEvaluation, icon: '⭐' },
   ];
 
   return (
@@ -27,7 +30,7 @@ const Navigation = () => {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
           <h1 style={{ margin: 0, fontSize: '1.5rem' }}>
-            📊 课程评价系统
+            📊 {t.appName}
           </h1>
           <div style={{ display: 'flex', gap: '1rem' }}>
             {navItems.map(item => (
@@ -52,7 +55,31 @@ const Navigation = () => {
             ))}
           </div>
         </div>
-        <LanguageToggle />
+        
+        {/* 全局语言切换按钮 */}
+        <div style={{
+          display: 'flex',
+          gap: '0.5rem',
+          background: 'rgba(255, 255, 255, 0.1)',
+          padding: '0.25rem',
+          borderRadius: '5px'
+        }}>
+          <button
+            onClick={toggleLanguage}
+            style={{
+              padding: '0.5rem 1.5rem',
+              border: 'none',
+              borderRadius: '3px',
+              background: language === 'cn' ? 'white' : 'transparent',
+              color: language === 'cn' ? '#667eea' : 'white',
+              cursor: 'pointer',
+              fontWeight: language === 'cn' ? '600' : '400',
+              transition: 'all 0.3s ease'
+            }}
+          >
+            {language === 'cn' ? '中文' : 'English'}
+          </button>
+        </div>
       </div>
     </nav>
   );

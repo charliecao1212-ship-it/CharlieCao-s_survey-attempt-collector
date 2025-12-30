@@ -1,7 +1,12 @@
 import React from 'react';
 import Navigation from './Navigation';
+import { useLanguage } from '../hooks/useLanguage';
+import { labels } from '../utils/translations';
 
 const Layout = ({ children }) => {
+  const { language } = useLanguage();
+  const t = labels[language];
+  
   return (
     <div className="app-container">
       <Navigation />
@@ -15,6 +20,7 @@ const Layout = ({ children }) => {
         borderTop: '1px solid #eee',
         marginTop: '2rem'
       }}>
+        <p>{t.footer}</p>
       </footer>
     </div>
   );
