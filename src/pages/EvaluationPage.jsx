@@ -1,52 +1,32 @@
-import React, { useState } from 'react';
 
-const EvaluationPage = ({ addSubmission }) => {
+import React, { useState } from 'react';
+import { useLanguage } from '../hooks/useLanguage';
+import { labels } from '../utils/translations';
+
+const EvaluationPage = ({ addSubmission, recentNames = [] }) => {
   const [formData, setFormData] = useState({
     name: '',
     gain: '',
     content: '',
     teacher: '',
     rating: 0,
-    feedback: ''
+    feedback: '',
+    todayCourse: '' // 新增：今天参加的课程
   });
 
-  const [language, setLanguage] = useState('cn');
   const [hoverRating, setHoverRating] = useState(0);
+  const { language } = useLanguage();
+  const t = labels[language];
 
-  const labels = {
-    cn: {
-      title: '课程评价表单',
-      name: '您的姓名',
-      namePlaceholder: '请输入您的姓名',
-      teacher: '授课教师',
-      teacherPlaceholder: '请输入教师姓名',
-      content: '本节课的内容',
-      contentPlaceholder: '请描述本节课的主要内容...',
-      gain: '本节课的收获',
-      gainPlaceholder: '请描述您从本节课中学到了什么...',
-      rating: '评分',
-      feedback: '其他反馈与建议',
-      feedbackPlaceholder: '请提供其他建议或意见...',
-      submit: '提交评价',
-      required: '（必填）'
-    },
-    en: {
-      title: 'Course Evaluation Form',
-      name: 'Your Name',
-      namePlaceholder: 'Please enter your name',
-      teacher: 'Instructor',
-      teacherPlaceholder: 'Please enter the teacher\'s name',
-      content: 'Content of this lesson',
-      contentPlaceholder: 'Please describe the main content of this lesson...',
-      gain: 'What did you gain from this lesson?',
-      gainPlaceholder: 'Please describe what you learned from this lesson...',
-      rating: 'Rating',
-      feedback: 'Additional Feedback',
-      feedbackPlaceholder: 'Please provide additional suggestions or comments...',
-      submit: 'Submit Evaluation',
-      required: '（Required）'
-    }
-  };
+  // 课程选项（可根据需要调整）
+  const courseOptions = [
+    { value: 'math', label: language === 'cn' ? '高等数学' : 'Advanced Mathematics' },
+    { value: 'english', label: language === 'cn' ? '大学英语' : 'College English' },
+    { value: 'physics', label: language === 'cn' ? '大学物理' : 'College Physics' },
+    { value: 'computer', label: language === 'cn' ? '计算机科学' : 'Computer Science' },
+    { value: 'chemistry', label: language === 'cn' ? '化学原理' : 'Chemistry Principles' },
+    { value: 'other', label: language === 'cn' ? '其他课程' : 'Other Course' }
+  ];
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -56,76 +36,64 @@ const EvaluationPage = ({ addSubmission }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    // 验证必填字段
-    if (!formData.name || !formData.teacher || !formData.content || !formData.gain) {
-      alert(language === 'cn' ? '请填写所有必填字段！' : 'Please fill in all required fields!');
+    // 验证必填字段（新增todayCourse验证）
+    if (!formData.name || !formData.teacher || !formData.content || !formData.gain || !formData.todayCourse) {
+      alert(t.fillRequired);
       return;
     }
     
+    // 调用父组件的添加函数
     addSubmission(formData);
     
-    alert(language === 'cn' ? '评价提交成功！' : 'Evaluation submitted successfully!');
+    alert(t.submitSuccess);
     
-    // 重置表单
+    // 重置表单（保留todayCourse选项）
     setFormData({
-      name: '',
+      name: formData.name,
       gain: '',
       content: '',
       teacher: '',
       rating: 0,
-      feedback: ''
+      feedback: '',
+      todayCourse: formData.todayCourse // 保留课程选择，方便连续评价同一课程
     });
     setHoverRating(0);
   };
 
-  const currentLabels = labels[language];
-
   return (
     <div className="card">
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '2rem'
-      }}>
-        <h1 style={{ margin: 0, color: '#444' }}>{currentLabels.title}</h1>
+      <h1 style={{ margin: '0 0 1rem 0', color: '#444' }}>{t.evalTitle}</h1>
+
+      {/* 最近评价者提示 */}
+      {recentNames.length > 0 && (
         <div style={{
-          display: 'flex',
-          gap: '0.5rem',
+          marginBottom: '1.5rem',
+          padding: '0.75rem',
           background: '#f8f9fa',
-          padding: '0.25rem',
-          borderRadius: '5px'
+          borderRadius: '5px',
+          fontSize: '0.9rem'
         }}>
-          <button
-            onClick={() => setLanguage('cn')}
-            style={{
-              padding: '0.5rem 1.5rem',
-              border: 'none',
-              borderRadius: '3px',
-              background: language === 'cn' ? '#667eea' : 'transparent',
-              color: language === 'cn' ? 'white' : '#666',
-              cursor: 'pointer',
-              fontWeight: language === 'cn' ? '600' : '400'
-            }}
-          >
-            中文
-          </button>
-          <button
-            onClick={() => setLanguage('en')}
-            style={{
-              padding: '0.5rem 1.5rem',
-              border: 'none',
-              borderRadius: '3px',
-              background: language === 'en' ? '#667eea' : 'transparent',
-              color: language === 'en' ? 'white' : '#666',
-              cursor: 'pointer',
-              fontWeight: language === 'en' ? '600' : '400'
-            }}
-          >
-            English
-          </button>
+          <span style={{ color: '#666' }}>最近提交过的评价者: </span>
+          {recentNames.map((name, index) => (
+            <button
+              key={index}
+              type="button"
+              onClick={() => setFormData(prev => ({ ...prev, name }))}
+              style={{
+                margin: '0 0.25rem 0.25rem 0',
+                padding: '0.125rem 0.5rem',
+                background: '#e9ecef',
+                border: '1px solid #dee2e6',
+                borderRadius: '3px',
+                cursor: 'pointer',
+                fontSize: '0.85rem'
+              }}
+            >
+              {name}
+            </button>
+          ))}
         </div>
-      </div>
+      )}
 
       <form onSubmit={handleSubmit}>
         <div style={{
@@ -134,10 +102,9 @@ const EvaluationPage = ({ addSubmission }) => {
           gap: '1.5rem',
           marginBottom: '1.5rem'
         }}>
-          {/* 姓名 */}
           <div className="form-group">
             <label className="form-label">
-              {currentLabels.name} <span style={{ color: '#ff4757' }}>*</span>
+              {t.nameLabel} <span style={{ color: '#ff4757' }}>*</span>
             </label>
             <input
               type="text"
@@ -145,15 +112,14 @@ const EvaluationPage = ({ addSubmission }) => {
               value={formData.name}
               onChange={handleChange}
               className="form-control"
-              placeholder={currentLabels.namePlaceholder}
+              placeholder={t.namePlaceholder}
               required
             />
           </div>
 
-          {/* 授课教师 */}
           <div className="form-group">
             <label className="form-label">
-              {currentLabels.teacher} <span style={{ color: '#ff4757' }}>*</span>
+              {t.teacherLabel} <span style={{ color: '#ff4757' }}>*</span>
             </label>
             <input
               type="text"
@@ -161,15 +127,37 @@ const EvaluationPage = ({ addSubmission }) => {
               value={formData.teacher}
               onChange={handleChange}
               className="form-control"
-              placeholder={currentLabels.teacherPlaceholder}
+              placeholder={t.teacherPlaceholder}
               required
             />
           </div>
         </div>
 
-        {/* 评分 */}
+        {/* 新增：今天参加的课程选择题 */}
         <div className="form-group">
-          <label className="form-label">{currentLabels.rating}</label>
+          <label className="form-label">
+            {t.todayCourse} <span style={{ color: '#ff4757' }}>*</span>
+          </label>
+          <select
+            name="todayCourse"
+            value={formData.todayCourse}
+            onChange={handleChange}
+            className="form-control"
+            required
+            style={{ height: '45px' }}
+          >
+            <option value="">{t.todayCoursePlaceholder}</option>
+            {courseOptions.map(option => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* 评分部分 */}
+        <div className="form-group">
+          <label className="form-label">{t.ratingLabel}</label>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
             <div className="rating-stars">
               {[1, 2, 3, 4, 5].map(star => (
@@ -186,96 +174,100 @@ const EvaluationPage = ({ addSubmission }) => {
               ))}
             </div>
             <span style={{ color: '#666' }}>
-              ({formData.rating === 0 ? language === 'cn' ? '未评分' : 'Not rated' : `${formData.rating}.0`})
+              ({formData.rating === 0 ? t.notRated : `${formData.rating}.0`})
             </span>
           </div>
         </div>
 
-        {/* 本节课的内容 */}
+        {/* 内容、收获、反馈字段 */}
         <div className="form-group">
           <label className="form-label">
-            {currentLabels.content} <span style={{ color: '#ff4757' }}>*</span>
+            {t.contentLabel} <span style={{ color: '#ff4757' }}>*</span>
           </label>
           <textarea
             name="content"
             value={formData.content}
             onChange={handleChange}
             className="form-control"
-            placeholder={currentLabels.contentPlaceholder}
+            placeholder={t.contentPlaceholder}
             rows="4"
             required
           />
         </div>
 
-        {/* 本节课的收获 */}
         <div className="form-group">
           <label className="form-label">
-            {currentLabels.gain} <span style={{ color: '#ff4757' }}>*</span>
+            {t.gainLabel} <span style={{ color: '#ff4757' }}>*</span>
           </label>
           <textarea
             name="gain"
             value={formData.gain}
             onChange={handleChange}
             className="form-control"
-            placeholder={currentLabels.gainPlaceholder}
+            placeholder={t.gainPlaceholder}
             rows="4"
             required
           />
         </div>
 
-        {/* 其他反馈 */}
         <div className="form-group">
-          <label className="form-label">{currentLabels.feedback}</label>
+          <label className="form-label">{t.feedbackLabel}</label>
           <textarea
             name="feedback"
             value={formData.feedback}
             onChange={handleChange}
             className="form-control"
-            placeholder={currentLabels.feedbackPlaceholder}
+            placeholder={t.feedbackPlaceholder}
             rows="3"
           />
         </div>
 
         <div style={{
           display: 'flex',
-          justifyContent: 'flex-end',
-          gap: '1rem',
+          justifyContent: 'space-between',
+          alignItems: 'center',
           marginTop: '2rem',
           paddingTop: '1.5rem',
           borderTop: '1px solid #eee'
         }}>
-          <button
-            type="button"
-            onClick={() => {
-              setFormData({
-                name: '',
-                gain: '',
-                content: '',
-                teacher: '',
-                rating: 0,
-                feedback: ''
-              });
-              setHoverRating(0);
-            }}
-            style={{
-              padding: '0.75rem 1.5rem',
-              border: '2px solid #667eea',
-              background: 'transparent',
-              color: '#667eea',
-              borderRadius: '5px',
-              cursor: 'pointer',
-              fontWeight: '500'
-            }}
-          >
-            {language === 'cn' ? '重置表单' : 'Reset Form'}
-          </button>
-          <button
-            type="submit"
-            className="btn btn-primary"
-            style={{ padding: '0.75rem 2rem' }}
-          >
-            {currentLabels.submit}
-          </button>
+          <div style={{ fontSize: '0.9rem', color: '#666' }}>
+            <span role="img" aria-label="save">💾</span> 表单内容已自动保存为草稿
+          </div>
+          <div style={{ display: 'flex', gap: '1rem' }}>
+            <button
+              type="button"
+              onClick={() => {
+                setFormData({
+                  name: '',
+                  gain: '',
+                  content: '',
+                  teacher: '',
+                  rating: 0,
+                  feedback: '',
+                  todayCourse: ''
+                });
+                setHoverRating(0);
+              }}
+              style={{
+                padding: '0.75rem 1.5rem',
+                border: '2px solid #667eea',
+                background: 'transparent',
+                color: '#667eea',
+                borderRadius: '5px',
+                cursor: 'pointer',
+                fontWeight: '500'
+              }}
+            >
+              {t.resetButton}
+            </button>
+            <button
+              type="submit"
+              className="btn btn-primary"
+              style={{ padding: '0.75rem 2rem' }}
+            >
+              {t.submitButton}
+            </button>
+          </div>
         </div>
       </form>
     </div>

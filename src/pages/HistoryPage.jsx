@@ -1,25 +1,29 @@
 import React, { useState } from 'react';
+import { useLanguage } from '../hooks/useLanguage';
+import { labels } from '../utils/translations';
 
 const HistoryPage = ({ submissions }) => {
   const [filter, setFilter] = useState('');
   const [selectedCourse, setSelectedCourse] = useState('all');
+  const { language } = useLanguage();
+  const t = labels[language];
 
-  const uniqueCourses = ['all', ...new Set(submissions.map(sub => sub.course))];
+  const uniqueCourses = ['all', ...new Set(submissions.map(sub => sub.todayCourse || '未选择'))];
   
   const filteredSubmissions = submissions.filter(sub => {
     const matchesSearch = 
       sub.name.toLowerCase().includes(filter.toLowerCase()) ||
-      sub.course.toLowerCase().includes(filter.toLowerCase()) ||
-      sub.teacher.toLowerCase().includes(filter.toLowerCase());
+      sub.teacher.toLowerCase().includes(filter.toLowerCase()) ||
+      (sub.todayCourse && sub.todayCourse.toLowerCase().includes(filter.toLowerCase()));
     
-    const matchesCourse = selectedCourse === 'all' || sub.course === selectedCourse;
+    const matchesCourse = selectedCourse === 'all' || (sub.todayCourse || '未选择') === selectedCourse;
     
     return matchesSearch && matchesCourse;
   });
 
   return (
     <div>
-      <h1 style={{ marginBottom: '2rem', color: '#444' }}>📋 历史评价记录</h1>
+      <h1 style={{ marginBottom: '2rem', color: '#444' }}>📋 {t.historyTitle}</h1>
       
       <div className="card" style={{ marginBottom: '2rem' }}>
         <div style={{
@@ -29,18 +33,18 @@ const HistoryPage = ({ submissions }) => {
           alignItems: 'end'
         }}>
           <div className="form-group">
-            <label className="form-label">搜索评价记录</label>
+            <label className="form-label">{t.searchPlaceholder}</label>
             <input
               type="text"
               className="form-control"
-              placeholder="搜索评价者、课程或教师..."
+              placeholder={t.searchPlaceholder}
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
             />
           </div>
           
           <div className="form-group">
-            <label className="form-label">按课程筛选</label>
+            <label className="form-label">{language === 'cn' ? '按今日课程筛选' : 'Filter by Today\'s Course'}</label>
             <select
               className="form-control"
               value={selectedCourse}
@@ -48,7 +52,7 @@ const HistoryPage = ({ submissions }) => {
             >
               {uniqueCourses.map(course => (
                 <option key={course} value={course}>
-                  {course === 'all' ? '所有课程' : course}
+                  {course === 'all' ? t.allCourses : course}
                 </option>
               ))}
             </select>
@@ -63,9 +67,9 @@ const HistoryPage = ({ submissions }) => {
           alignItems: 'center',
           marginBottom: '1rem'
         }}>
-          <h2 style={{ margin: 0 }}>评价记录列表</h2>
+          <h2 style={{ margin: 0 }}>{t.recordList}</h2>
           <div style={{ color: '#666' }}>
-            共 {filteredSubmissions.length} 条记录
+            {filteredSubmissions.length} {t.totalRecords}
           </div>
         </div>
         
@@ -76,13 +80,13 @@ const HistoryPage = ({ submissions }) => {
             color: '#999'
           }}>
             <p style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>📭</p>
-            <p>未找到匹配的评价记录</p>
+            <p>{t.noRecords}</p>
             <button 
               onClick={() => { setFilter(''); setSelectedCourse('all'); }}
               className="btn btn-primary"
               style={{ marginTop: '1rem' }}
             >
-              重置筛选条件
+              {t.resetFilter}
             </button>
           </div>
         ) : (
@@ -90,14 +94,14 @@ const HistoryPage = ({ submissions }) => {
             <table className="data-table">
               <thead>
                 <tr>
-                  <th>ID</th>
-                  <th>评价者</th>
-                  <th>课程名称</th>
-                  <th>授课教师</th>
-                  <th>本节课收获</th>
-                  <th>本节课内容</th>
-                  <th>评分</th>
-                  <th>提交日期</th>
+                  <th>{t.tableId}</th>
+                  <th>{t.tableEvaluator}</th>
+                  <th>{language === 'cn' ? '今日课程' : 'Today\'s Course'}</th> {/* 删除 course 列，只保留 today's course */}
+                  <th>{t.tableTeacher}</th>
+                  <th>{t.tableGain}</th>
+                  <th>{t.tableContent}</th>
+                  <th>{t.tableRating}</th>
+                  <th>{t.tableDate}</th>
                 </tr>
               </thead>
               <tbody>
@@ -105,7 +109,7 @@ const HistoryPage = ({ submissions }) => {
                   <tr key={sub.id}>
                     <td>{sub.id}</td>
                     <td><strong>{sub.name}</strong></td>
-                    <td>{sub.course}</td>
+                    <td>{sub.todayCourse || '-'}</td> {/* 只显示 todayCourse */}
                     <td>{sub.teacher}</td>
                     <td style={{ maxWidth: '200px' }}>{sub.gain}</td>
                     <td style={{ maxWidth: '200px' }}>{sub.content}</td>
