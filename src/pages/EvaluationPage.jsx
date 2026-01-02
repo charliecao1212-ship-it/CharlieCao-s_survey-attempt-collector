@@ -20,11 +20,11 @@ const EvaluationPage = ({ addSubmission, recentNames = [] }) => {
 
   // 课程选项（可根据需要调整）
   const courseOptions = [
-    { value: 'math', label: language === 'cn' ? '高等数学' : 'Advanced Mathematics' },
-    { value: 'english', label: language === 'cn' ? '大学英语' : 'College English' },
-    { value: 'physics', label: language === 'cn' ? '大学物理' : 'College Physics' },
-    { value: 'computer', label: language === 'cn' ? '计算机科学' : 'Computer Science' },
-    { value: 'chemistry', label: language === 'cn' ? '化学原理' : 'Chemistry Principles' },
+    { value: 'coding f', label: language === 'cn' ? '语法基础' : 'fundamental coding grammar' },
+    { value: 'coding ad', label: language === 'cn' ? '语法进阶' : 'advanced coding grammar' },
+    { value: 'coding acc', label: language === 'cn' ? '语法加速' : 'accelerated coding grammar' },
+    { value: 'algorithm f', label: language === 'cn' ? '算法原理' : 'algorithm principles' },
+    { value: 'algorithm ad', label: language === 'cn' ? '高阶算法' : 'advanced algorithms' },
     { value: 'other', label: language === 'cn' ? '其他课程' : 'Other Course' }
   ];
 
