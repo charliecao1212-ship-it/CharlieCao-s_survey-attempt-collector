@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useLanguage } from '../hooks/useLanguage';
 import { labels } from '../utils/translations';
 
-const EvaluationPage = ({ addSubmission, recentNames = [] }) => {
+const EvaluationPage = ({ addSubmission = [] }) => {
   const [formData, setFormData] = useState({
     name: '',
     gain: '',
@@ -63,38 +63,6 @@ const EvaluationPage = ({ addSubmission, recentNames = [] }) => {
   return (
     <div className="card">
       <h1 style={{ margin: '0 0 1rem 0', color: '#444' }}>{t.evalTitle}</h1>
-
-      {/* 最近评价者提示 */}
-      {recentNames.length > 0 && (
-        <div style={{
-          marginBottom: '1.5rem',
-          padding: '0.75rem',
-          background: '#f8f9fa',
-          borderRadius: '5px',
-          fontSize: '0.9rem'
-        }}>
-          <span style={{ color: '#666' }}>最近提交过的评价者: </span>
-          {recentNames.map((name, index) => (
-            <button
-              key={index}
-              type="button"
-              onClick={() => setFormData(prev => ({ ...prev, name }))}
-              style={{
-                margin: '0 0.25rem 0.25rem 0',
-                padding: '0.125rem 0.5rem',
-                background: '#e9ecef',
-                border: '1px solid #dee2e6',
-                borderRadius: '3px',
-                cursor: 'pointer',
-                fontSize: '0.85rem'
-              }}
-            >
-              {name}
-            </button>
-          ))}
-        </div>
-      )}
-
       <form onSubmit={handleSubmit}>
         <div style={{
           display: 'grid',
